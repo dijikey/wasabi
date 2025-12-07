@@ -30,18 +30,6 @@ where
     }
 }
 
-macro_rules! debug_impl {
-    [$(trait_name: $trn: ident, r#trait: $tr:ident, field: $field:ident),+] => {
-        impl<$($trn,)+> Debug for Engine<$($trn,)+>
-            where $($trn: $tr + Debug)+{
-            fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-                f.debug_struct("Engine")
-                $( .field(stringify!($field), &self.$field ) )+
-                .finish()
-            }
-        }
-    };
-}
 
 debug_impl![
     trait_name: SC, r#trait: SceneCatalog, field: scene_manager
