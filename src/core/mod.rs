@@ -2,10 +2,7 @@ use crate::core::scene::{SceneCatalog, SceneFn};
 use gethand::Getters;
 use std::fmt::{Debug, Formatter};
 
-pub mod scene;
-use scene::SceneManager as DefSceneManager;
-
-#[derive(Getters)]
+#[derive(Getters, DebugIf)]
 pub struct Engine<SceneManager = DefSceneManager>
 where
     SceneManager: SceneCatalog,
