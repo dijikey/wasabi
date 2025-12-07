@@ -2,8 +2,8 @@
 
 use std::fmt::Debug;
 
-pub mod scene;
 mod resource;
+pub mod scene;
 
 /// Trait for layers with render/update ordering support
 pub trait Layer: Debug {
@@ -14,8 +14,9 @@ pub trait Layer: Debug {
     fn render(&mut self);
 
     /// Whether the layer is visible
-    fn is_visible(&self) -> bool{ true }
-
+    fn is_visible(&self) -> bool {
+        true
+    }
 
     /// Updates the layer's state
     ///
@@ -24,7 +25,7 @@ pub trait Layer: Debug {
     fn update(&mut self);
 
     /// Whether the layer is active (gets updated)
-    fn is_frozen(&self) -> bool{ 
+    fn is_frozen(&self) -> bool {
         false
     }
 }

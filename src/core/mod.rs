@@ -1,8 +1,8 @@
-use wasabi_traits::scene::SceneFn;
+use crate::default::SceneManager as DefSceneManager;
 use gethand::{DebugIf, Getters};
 use std::fmt::{Debug, Formatter};
-use crate::default::SceneManager as DefSceneManager;
 use wasabi_traits::scene::SceneCatalog;
+use wasabi_traits::scene::SceneFn;
 
 #[derive(Getters, DebugIf)]
 pub struct Engine<ResourceSystem, SceneManager = DefSceneManager>
@@ -10,7 +10,7 @@ where
     SceneManager: SceneCatalog,
 {
     scene_manager: SceneManager,
-    resource_system: ResourceSystem
+    resource_system: ResourceSystem,
 }
 impl<SceneManager, ResourceSystem> Engine<ResourceSystem, SceneManager>
 where
@@ -19,7 +19,7 @@ where
     pub fn new(scene_manager: SceneManager, resource_system: ResourceSystem) -> Self {
         Engine {
             scene_manager,
-            resource_system
+            resource_system,
         }
     }
 
@@ -37,7 +37,6 @@ where
     }
 }
 
-
 // impl Default for Engine {
 //     fn default() -> Self {
 //         Self {
@@ -45,4 +44,4 @@ where
 //         }
 //     }
 // }
-// 
+//

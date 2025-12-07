@@ -8,7 +8,7 @@ pub trait SceneCatalog {
     type Scene: SceneFn;
 
     /// Move to the next scene (wraps around)
-    /// 
+    ///
     /// You should also call function [SceneFn::on_awake], because trait [SceneFn] expects this.
     fn next(&mut self);
     /// Get mutable access to current scene
@@ -26,17 +26,16 @@ pub trait SceneFn {
     /// Caller must ensure: 0 ≤ i < self.count()
     #[must_use]
     fn get(&mut self, i: usize) -> &mut Box<dyn Layer>;
-    
+
     /// Returns the total number of layers
     #[must_use]
     fn len(&self) -> usize;
 
     /// Called when the [SceneFn] is first used
-    fn on_awake(&mut self){ }
+    fn on_awake(&mut self) {}
 
     /// Update the scene state
-    /// 
+    ///
     /// Can be used for ECS system
-    fn update(&mut self){ }
+    fn update(&mut self) {}
 }
-

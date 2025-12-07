@@ -23,7 +23,7 @@ pub fn new() {
     }
 
     impl SceneFn for Screen {
-        fn get(&mut self, i: usize) -> &mut Box<dyn Layer> {
+        fn get(&mut self, _: usize) -> &mut Box<dyn Layer> {
             &mut self.layer
         }
 
@@ -45,11 +45,14 @@ pub fn new() {
         }
     }
 
-    let mut engine = Engine::new(Controller {
-        screen: Screen {
-            layer: Box::new(Alpha {}),
+    let mut engine = Engine::new(
+        Controller {
+            screen: Screen {
+                layer: Box::new(Alpha {}),
+            },
         },
-    }, String::from("Resource System is any struct|enum"));
+        String::from("Resource System is any struct|enum"),
+    );
 
     println!("engine created");
     println!("{engine:?}");
