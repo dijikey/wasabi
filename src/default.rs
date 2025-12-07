@@ -1,37 +1,16 @@
-use crate::Layer;
+//! This module contains the basic trait implementation.
+//!
+//! Everything contained here is not suitable for game development (most likely)
 
-/// A catalog/traversal interface for managing a sequence of scenes
-pub trait SceneCatalog {
-    /// The concrete scene type managed by this catalog
-    ///
-    /// Must implement the SceneFn trait for layer access
-    type Scene: SceneFn;
+use std::fmt::Debug;
+use wasabi_traits::Layer;
+use wasabi_traits::scene::{SceneCatalog, SceneFn};
 
-    /// Move to the next scene (wraps around)
-    fn next(&mut self);
-    /// Get mutable access to current scene
-    #[must_use]
-    fn curr(&mut self) -> &mut Self::Scene;
-}
-
-/// Trait for scene layer management with indexed access
+/// Is not an implementation for creating games, mostly just for examples.
 ///
-/// Similar to an indexable collection with dynamic dispatch
-#[allow(clippy::len_without_is_empty)]
-pub trait SceneFn {
-    /// Returns a mutable reference to the i-th layer (0-based index).
-    ///
-    /// Caller must ensure: 0 ≤ i < self.count()
-    #[must_use]
-    fn get(&mut self, i: usize) -> &mut Box<dyn Layer>;
-    /// Returns the total number of layers
-    #[must_use]
-    fn len(&self) -> usize;
-}
-
 /// A scene containing multiple renderable layers
 ///
-/// Default realization for SceneFn
+/// To create your own structure, use a trait [`SceneFn`]
 #[derive(Debug, Default)]
 pub struct Scene {
     layers: Vec<Box<dyn Layer>>,
@@ -41,6 +20,10 @@ impl Scene {
     /// Creates a new empty scene
     pub fn new() -> Scene {
         Scene { layers: vec![] }
+    }
+
+    pub fn with_layers(layers: Vec<Box<dyn Layer>>) -> Scene {
+        Scene { layers }
     }
 
     /// Adds a new layer to the scene
@@ -91,7 +74,7 @@ impl SceneCatalog for SceneManager {
             true => self.curr_index = 0,
             false => self.curr_index += 1,
         };
-        
+
         self.curr().on_awake()
     }
 
