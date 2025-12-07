@@ -31,9 +31,6 @@ where
 }
 
 
-debug_impl![
-    trait_name: SC, r#trait: SceneCatalog, field: scene_manager
-];
 
 impl Default for Engine {
     fn default() -> Self {
