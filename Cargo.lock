@@ -51,4 +51,9 @@ name = "wasabi"
 version = "0.1.2"
 dependencies = [
  "gethand",
+ "wasabi-traits",
 ]
+
+[[package]]
+name = "wasabi-traits"
+version = "0.1.0"

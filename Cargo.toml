@@ -11,5 +11,6 @@ keywords = ["game", "engine", "gamedev", "graphics", "wasabi"]
 
 
 [dependencies]
+wasabi-traits = {path = "crates/wasabi-traits"}
 gethand = { path = "crates/gethand" }
 
