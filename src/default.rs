@@ -59,6 +59,9 @@ impl SceneFn for Scene {
     }
 }
 
+/// Is not an implementation for creating games, mostly just for examples.
+///
+/// To create your own structure, use a trait [`SceneCatalog`]
 #[derive(Debug, Default)]
 pub struct SceneManager {
     pub scenes: Vec<Scene>,
