@@ -1,17 +1,17 @@
-use crate::{Engine, Layer};
 use crate::scene::{SceneCatalog, SceneFn};
+use crate::{Engine, Layer};
 
 #[test]
-pub fn new(){
+pub fn new() {
     #[derive(Debug)]
-    struct Controller{
-        screen: Screen
+    struct Controller {
+        screen: Screen,
     }
 
-    impl SceneCatalog for Controller{
+    impl SceneCatalog for Controller {
         type Scene = Screen;
 
-        fn next(&mut self) { }
+        fn next(&mut self) {}
 
         fn curr(&mut self) -> &mut Self::Scene {
             &mut self.screen
@@ -19,11 +19,11 @@ pub fn new(){
     }
 
     #[derive(Debug)]
-    struct Screen{
+    struct Screen {
         layer: Box<dyn Layer>,
     }
 
-    impl SceneFn for Screen{
+    impl SceneFn for Screen {
         fn get(&mut self, i: usize) -> &mut Box<dyn Layer> {
             &mut self.layer
         }
@@ -34,25 +34,26 @@ pub fn new(){
     }
 
     #[derive(Debug)]
-    struct Alpha{}
+    struct Alpha {}
 
-    impl Layer for Alpha{
-        fn render(&mut self) { println!("render"); }
+    impl Layer for Alpha {
+        fn render(&mut self) {
+            println!("render");
+        }
 
-        fn update(&mut self) { println!("update"); }
+        fn update(&mut self) {
+            println!("update");
+        }
     }
 
-
-    let mut engine = Engine::new(
-        Controller{
-            screen: Screen{
-                layer: Box::new(Alpha{}),
-            },
-        }
-    );
+    let mut engine = Engine::new(Controller {
+        screen: Screen {
+            layer: Box::new(Alpha {}),
+        },
+    });
 
     println!("engine created");
     println!("{engine:?}");
-    
+
     engine.cycle()
 }

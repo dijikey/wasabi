@@ -1,6 +1,15 @@
 [package]
 name = "wasabi"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
+license = "MIT"
+authors = ["dijikey"]
+categories = ["game-engines", "graphics", "gui", "rendering"]
+repository = "https://github.com/dijikey/wasabi"
+description = "A simple 3D game engine with a fully customized architecture"
+keywords = ["game", "engine", "gamedev", "graphics", "wasabi"]
+
 
 [dependencies]
+gethand = { path = "crates/gethand" }
+
