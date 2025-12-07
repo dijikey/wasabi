@@ -74,8 +74,8 @@ impl SceneManager {
         }
     }
 
-    /// Adds a scene to the manager
-    pub fn add_scene(&mut self, scene: Scene) {
+    /// Push a scene to the manager
+    pub fn push_scene(&mut self, scene: Scene) {
         self.scenes.push(scene);
     }
 }
