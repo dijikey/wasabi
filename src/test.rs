@@ -1,5 +1,4 @@
-use crate::scene::{SceneCatalog, SceneFn};
-use crate::{Engine, Layer};
+use crate::prelude::*;
 
 #[test]
 pub fn new() {
@@ -50,7 +49,7 @@ pub fn new() {
         screen: Screen {
             layer: Box::new(Alpha {}),
         },
-    });
+    }, String::from("Resource System is any struct|enum"));
 
     println!("engine created");
     println!("{engine:?}");
