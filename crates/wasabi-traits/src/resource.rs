@@ -22,13 +22,3 @@ pub trait ResourceCatalog{
     fn free_shader(&mut self, id: Self::Id);
     fn free_mesh(&mut self, id: Self::Id);
 }
-
-trait AsSearcher{
-    type Searcher: Searcher;
-
-    fn as_searcher(&self) -> Self::Searcher;
-}
-
-trait Searcher{
-    fn next_match(&mut self) -> Option<&str>;
-}
