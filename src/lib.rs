@@ -12,5 +12,3 @@ pub mod prelude{
 
 #[cfg(test)]
 mod test;
-
-pub use core::*;
