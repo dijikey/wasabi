@@ -3,7 +3,7 @@ use proc_macro2::Ident;
 use quote::quote;
 use syn::{Data, DeriveInput, Fields, parse_macro_input};
 
-#[proc_macro_derive(Getters)]
+#[proc_macro_derive(Getters, attributes(skip))]
 pub fn getters_derive(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
     let name = input.ident;
@@ -20,9 +20,14 @@ pub fn getters_derive(input: TokenStream) -> TokenStream {
     let mut immut_getters = Vec::new();
     let mut mut_getters = Vec::new();
 
-    for field in fields {
+    'main: for field in fields {
         let field_name = field.ident.as_ref().unwrap();
         let field_type = &field.ty;
+        for attr in &field.attrs{
+            if attr.path().is_ident("skip") {
+                continue 'main;
+            }
+        }
 
         immut_getters.push(quote! {
             pub fn #field_name(&self) -> &#field_type {
