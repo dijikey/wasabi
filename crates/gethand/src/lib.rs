@@ -1,7 +1,7 @@
 use proc_macro::TokenStream;
 use proc_macro2::Ident;
 use quote::quote;
-use syn::{Data, DeriveInput, Fields, parse_macro_input};
+use syn::{parse_macro_input, Data, DeriveInput, Fields, WherePredicate};
 
 #[proc_macro_derive(Getters, attributes(skip))]
 pub fn getters_derive(input: TokenStream) -> TokenStream {
