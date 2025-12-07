@@ -87,7 +87,9 @@ impl SceneCatalog for SceneManager {
         match self.curr_index == self.scenes.len() - 1 {
             true => self.curr_index = 0,
             false => self.curr_index += 1,
-        }
+        };
+        
+        self.curr().on_awake()
     }
 
     fn curr(&mut self) -> &mut Self::Scene {
