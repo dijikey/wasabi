@@ -1,9 +1,9 @@
 use proc_macro::TokenStream;
 use proc_macro2::Ident;
 use quote::quote;
-use syn::{parse_macro_input, Data, DeriveInput, Fields, WherePredicate};
+use syn::{Data, DeriveInput, Fields, WherePredicate, parse_macro_input};
 
-#[proc_macro_derive(Getters, attributes(skip))]
+#[proc_macro_derive(Getters, attributes(skip, only_mut))]
 pub fn getters_derive(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
     let name = input.ident;
@@ -17,23 +17,32 @@ pub fn getters_derive(input: TokenStream) -> TokenStream {
         _ => panic!("Getters only for structs"),
     };
 
+    let mut only_mut = false;
+    for attr in &input.attrs {
+        if attr.path().is_ident("only_mut") {
+            only_mut = true;
+        }
+    }
+
     let mut immut_getters = Vec::new();
     let mut mut_getters = Vec::new();
 
     'main: for field in fields {
         let field_name = field.ident.as_ref().unwrap();
         let field_type = &field.ty;
-        for attr in &field.attrs{
+        for attr in &field.attrs {
             if attr.path().is_ident("skip") {
                 continue 'main;
             }
         }
 
-        immut_getters.push(quote! {
-            pub fn #field_name(&self) -> &#field_type {
-                &self.#field_name
-            }
-        });
+        if !only_mut {
+            immut_getters.push(quote! {
+                pub fn #field_name(&self) -> &#field_type {
+                    &self.#field_name
+                }
+            });
+        }
 
         let mut_name = Ident::new(&format!("{field_name}_mut"), field_name.span());
 
@@ -101,7 +110,6 @@ pub fn debug_if_debug(input: TokenStream) -> TokenStream {
             }
         }
     }
-
 
     let expanded = quote! {
         impl #impl_generics Debug for #name #ty_generics_impl #new_where_clause {
