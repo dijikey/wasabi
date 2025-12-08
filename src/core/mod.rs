@@ -1,25 +1,28 @@
 use crate::default::SceneManager as DefSceneManager;
 use gethand::{DebugIf, Getters};
 use std::fmt::{Debug, Formatter};
+use wasabi_traits::event::EventHandler;
 use wasabi_traits::scene::SceneCatalog;
 use wasabi_traits::scene::SceneFn;
 
 #[derive(Getters, DebugIf)]
-pub struct Engine<ResourceSystem, SceneManager = DefSceneManager>
+pub struct Engine<EventSystem, SceneManager = DefSceneManager>
 where
     SceneManager: SceneCatalog,
+    EventSystem: EventHandler,
 {
     scene_manager: SceneManager,
-    resource_system: ResourceSystem,
+    event_system: EventSystem,
 }
-impl<SceneManager, ResourceSystem> Engine<ResourceSystem, SceneManager>
+impl<SceneManager, EventSystem> Engine<EventSystem, SceneManager>
 where
     SceneManager: SceneCatalog,
+    EventSystem: EventHandler,
 {
-    pub fn new(scene_manager: SceneManager, resource_system: ResourceSystem) -> Self {
+    pub fn new(scene_manager: SceneManager, event_system: EventSystem) -> Self {
         Engine {
             scene_manager,
-            resource_system,
+            event_system,
         }
     }
 
@@ -36,12 +39,3 @@ where
         }
     }
 }
-
-// impl Default for Engine {
-//     fn default() -> Self {
-//         Self {
-//             scene_manager: DefSceneManager::default(),
-//         }
-//     }
-// }
-//
