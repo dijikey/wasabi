@@ -1,0 +1,8 @@
+[package]
+name = "wasabi-event_sys"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+wasabi-traits = {path = "../wasabi-traits"}
+gethand = {path = "../gethand"}
