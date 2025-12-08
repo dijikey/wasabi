@@ -56,7 +56,7 @@ pub fn getters_derive(input: TokenStream) -> TokenStream {
     TokenStream::from(expanded)
 }
 
-#[proc_macro_derive(DebugIf, attributes(skip))]
+#[proc_macro_derive(DebugIf)]
 pub fn debug_if_debug(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
     let name = input.ident;
