@@ -2,7 +2,7 @@
 
 use std::fmt::Debug;
 
-mod resource;
+pub mod event;
 pub mod scene;
 
 /// Trait for layers with render/update ordering support
