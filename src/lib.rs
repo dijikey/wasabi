@@ -1,4 +1,5 @@
 mod core;
+#[cfg(not(feature = "no-default"))]
 pub mod default;
 
 pub use core::*;
