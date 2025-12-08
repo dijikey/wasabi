@@ -1,7 +1,10 @@
 use crate::prelude::*;
+use wasabi_event_sys::{EventSystem, Tag};
 
 #[test]
 pub fn new() {
+    use std::sync::Arc;
+
     #[derive(Debug)]
     struct Controller {
         screen: Screen,
@@ -51,8 +54,15 @@ pub fn new() {
                 layer: Box::new(Alpha {}),
             },
         },
-        String::from("Resource System is any struct|enum"),
+        EventSystem::default(),
     );
+
+    let st = Arc::from(Alpha {});
+    let alpha = Arc::clone(&st);
+    *engine.event_system_mut() += Tag::KeyPressed(Box::new(move || {
+        println!("key pressed");
+        println!("{:?}", alpha);
+    }));
 
     println!("engine created");
     println!("{engine:?}");
