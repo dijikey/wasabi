@@ -1,10 +1,20 @@
+extern crate wasabi_win as win;
+
 use crate::prelude::*;
+use log::info;
 use wasabi_event_sys::{EventSystem, Tag};
+use wasabi_win::builder::WindowBuilder;
+
+fn log_init() {
+    let _ = env_logger::builder()
+        .filter_level(log::LevelFilter::Info)
+        .format_timestamp(None)
+        .is_test(true)
+        .try_init();
+}
 
 #[test]
-pub fn new() {
-    use std::sync::Arc;
-
+pub fn main() {
     #[derive(Debug)]
     struct Controller {
         screen: Screen,
@@ -48,24 +58,33 @@ pub fn new() {
         }
     }
 
-    let mut engine = Engine::new(
-        Controller {
+    log_init();
+
+    let mut engine = {
+        let scene_manager = Controller {
             screen: Screen {
                 layer: Box::new(Alpha {}),
             },
-        },
-        EventSystem::default(),
-    );
+        };
 
-    let st = Arc::from(Alpha {});
-    let alpha = Arc::clone(&st);
-    *engine.event_system_mut() += Tag::KeyPressed(Box::new(move || {
-        println!("key pressed");
-        println!("{:?}", alpha);
+        let event_system = EventSystem::default();
+
+        let window = WindowBuilder::default()
+            .build()
+            .unwrap()
+            .init((800, 600, "Application", win::WindowMode::Windowed))
+            .unwrap();
+
+        Engine::new(scene_manager, event_system, window)
+    };
+
+    let tag = Tag::KeyPressed(Box::new(move |key| {
+        info!("{key:?}");
     }));
 
-    println!("engine created");
-    println!("{engine:?}");
+    engine.event_system().insert(tag);
 
-    engine.cycle()
+    engine.run(|| {});
+
+    println!("{engine:?}");
 }
