@@ -1,5 +1,5 @@
 mod core;
-#[cfg(not(feature = "no-default"))]
+#[cfg(feature = "default")]
 pub mod default;
 
 pub use core::*;
@@ -7,6 +7,7 @@ pub use core::*;
 pub mod traits {
     pub use wasabi_traits::*;
 }
+
 pub mod prelude {
     pub use crate::core::*;
     pub use crate::traits::Layer;
