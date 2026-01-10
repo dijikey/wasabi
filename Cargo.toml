@@ -10,12 +10,15 @@ description = "A simple 3D game engine with a fully customized architecture"
 keywords = ["game", "engine", "gamedev", "graphics", "wasabi"]
 
 [features]
-no-default = []
+default = []
 
 [dependencies]
 wasabi-traits = {path = "crates/wasabi-traits"}
 gethand = { path = "crates/gethand" }
+log = "0.4.25"
 
 
 [dev-dependencies]
 wasabi-event_sys = {path = "crates/wasabi-event_sys", features = []}
+wasabi-win = {path = "crates/wasabi-win"}
+env_logger = "0.11.5"
