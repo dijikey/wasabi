@@ -1,0 +1,9 @@
+[package]
+name = "wasabi-win"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+wasabi-traits = {path="../wasabi-traits"}
+glfw = "0.60.0"
+builder-helper = { path="F:/projects/rust/builder-helper" }
