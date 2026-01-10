@@ -1,9 +1,9 @@
-use glfw::Context;
+use std::os;
+
+use glfw::{Context, PWindow};
 use glfw::{Glfw, InitError};
 use wasabi_traits::WindowContext;
 
-pub use glfw::Action;
-pub use glfw::Key;
 pub use glfw::OpenGlProfileHint;
 pub use glfw::WindowHint;
 pub use glfw::WindowMode;
@@ -11,6 +11,10 @@ pub use glfw::WindowMode;
 #[allow(dead_code)]
 pub mod builder;
 use crate::builder::WindowBuilder;
+
+pub fn builder<'a>() -> WindowBuilder<'a> {
+    WindowBuilder::default()
+}
 
 #[allow(private_bounds)]
 #[derive(Debug)]
@@ -21,19 +25,12 @@ pub struct Window<Flag: WindowFlag> {
     marker: std::marker::PhantomData<Flag>,
 }
 
-#[allow(private_bounds)]
-impl<T: WindowFlag> Window<T> {
-    pub fn builder() -> WindowBuilder {
-        WindowBuilder::default()
-    }
-}
-
 impl Window<Constructed> {
     pub fn new() -> Result<Self, WindowError> {
         use glfw::fail_on_errors;
         let glfw = glfw::init(fail_on_errors!())?;
 
-        Ok(Self {
+        Ok(Window {
             glfw,
             raw: None,
             marker: std::marker::PhantomData,
@@ -68,10 +65,29 @@ impl Window<Constructed> {
     }
 }
 
+impl Window<Initialized> {
+    #[inline(always)]
+    fn raw_mut(&mut self) -> &mut PWindow {
+        // SAFETY
+        unsafe { self.raw.as_mut().unwrap_unchecked() }
+    }
+
+    #[inline(always)]
+    fn raw_ref(&self) -> &PWindow {
+        // SAFETY
+        unsafe { self.raw.as_ref().unwrap_unchecked() }
+    }
+
+    pub fn time(&self) -> f64 {
+        self.glfw.get_time()
+    }
+}
+
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
 pub enum WindowError {
     AlreadyInitialized,
     Internal,
+    WindowNone,
 }
 
 impl From<InitError> for WindowError {
@@ -84,19 +100,16 @@ impl From<InitError> for WindowError {
 }
 
 impl WindowContext for Window<Initialized> {
+    type MouseKey = glfw::MouseButton;
     type Key = glfw::Key;
     type Action = glfw::Action;
 
     fn should_close(&self) -> bool {
-        // SAFETY
-        unsafe { self.raw.as_ref().unwrap_unchecked().should_close() }
+        self.raw_ref().should_close()
     }
 
     fn swap_buffer(&mut self) {
-        // SAFETY
-        unsafe {
-            self.raw.as_mut().unwrap_unchecked().swap_buffers();
-        }
+        self.raw_mut().swap_buffers();
     }
 
     fn poll_events(&mut self) {
@@ -107,25 +120,38 @@ impl WindowContext for Window<Initialized> {
     where
         F: FnMut(Self::Key, Self::Action) + 'static,
     {
-        unsafe {
-            self.raw.as_mut().unwrap_unchecked().set_key_callback(
-                move |_win, key, _scancode, action, _modifiers| callback(key, action),
-            );
-        }
+        self.raw_mut()
+            .set_key_callback(move |_win, key, _scancode, action, _modifiers| {
+                callback(key, action)
+            });
     }
 
-    // fn hook_key_callback<F: FnMut(Self::Key, Self::Action) + 'static>(&mut self, mut callback: F) {
-    //     // SAFETY
-    //     unsafe {
-    //         self.raw.as_mut().unwrap_unchecked().set_key_callback(
-    //             move |_window, key, _scancode, action, _modifiers| callback(key, action),
-    //         );
-    //     }
-    // }
+    fn hook_mouse_position_callback<F>(&mut self, mut callback: F)
+    where
+        F: FnMut(f64, f64) + 'static,
+    {
+        self.raw_mut()
+            .set_cursor_pos_callback(move |_win, x, y| callback(x, y));
+    }
 
-    // fn loader_function<T>(&mut self, s: &str) -> *const T {
-    //     unsafe { self.raw.as_mut().unwrap_unchecked().get_proc_address(s) as *const _ }
-    // }
+    fn hook_mouse_callback<F>(&mut self, mut callback: F)
+    where
+        F: FnMut(Self::MouseKey, Self::Action) + 'static,
+    {
+        self.raw_mut()
+            .set_mouse_button_callback(move |_win, btn, action, _modifiers| callback(btn, action));
+    }
+
+    fn loader_function(&mut self, s: &str) -> *const os::raw::c_void {
+        unsafe {
+            self.raw
+                .as_mut()
+                .unwrap_unchecked()
+                .get_proc_address(s)
+                .map(|f| std::mem::transmute(f))
+                .unwrap_or(std::ptr::null())
+        }
+    }
 }
 
 #[derive(Debug)]
