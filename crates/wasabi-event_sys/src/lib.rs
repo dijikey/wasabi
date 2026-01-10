@@ -1,26 +1,33 @@
 #[cfg(test)]
 mod test;
 
-use gethand::Getters;
+use std::collections::HashMap;
 use std::fmt::{Debug, Formatter};
-use std::ops::AddAssign;
-use wasabi_traits::event::EventHandler;
+use wasabi_traits::input::InputHandler;
 
-type Callback = Box<dyn Fn() + Send + Sync + 'static>;
+type SIZE = u32;
+
+#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
+pub struct ID(SIZE);
+static mut GLOBAL_COUNTER: SIZE = 0;
+
+type KeyCallback = Box<dyn Fn(glfw::Key) + 'static>;
+type Callback = Box<dyn Fn() + 'static>;
 
 /// Tag for adding a callback
 /// # Use
 /// ```
 /// use wasabi_event_sys::{EventSystem, Tag};
-/// use wasabi_traits::event::EventHandler;
+/// use wasabi_traits::input::InputHandler;
 /// let mut system = EventSystem::default();
-/// system += Tag::KeyPressed(Box::new(|| println!("Key pressed")));
+/// let tag = Tag::KeyPressed(Box::new(|| println!("Key pressed")));
+/// let id = system.insert(tag);
 /// // You don't need to call the function yourself, it's called inside the engine.
 /// system.key_pressed();
 /// ```
 pub enum Tag {
-    KeyPressed(Callback),
-    KeyReleased(Callback),
+    KeyPressed(KeyCallback),
+    KeyReleased(KeyCallback),
     MousePressed(Callback),
     MouseReleased(Callback),
     MouseMoved(Callback),
@@ -32,40 +39,42 @@ pub enum Tag {
     WindowMoved(Callback),
 }
 
-#[derive(Default, Getters)]
-#[only_mut]
+#[derive(Default)]
 pub struct EventSystem {
-    key_pressed: Vec<Callback>,
-    key_released: Vec<Callback>,
-    mouse_pressed: Vec<Callback>,
-    mouse_released: Vec<Callback>,
-    mouse_moved: Vec<Callback>,
-    window_resized: Vec<Callback>,
-    window_closed: Vec<Callback>,
-    window_focused: Vec<Callback>,
-    window_lost_focus: Vec<Callback>,
-    window_moved: Vec<Callback>,
+    key_pressed: HashMap<ID, KeyCallback>,
+    key_released: HashMap<ID, KeyCallback>,
+    mouse_pressed: HashMap<ID, Callback>,
+    mouse_released: HashMap<ID, Callback>,
+    mouse_moved: HashMap<ID, Callback>,
+    window_resized: HashMap<ID, Callback>,
+    window_closed: HashMap<ID, Callback>,
+    window_focused: HashMap<ID, Callback>,
+    window_lost_focus: HashMap<ID, Callback>,
+    window_moved: HashMap<ID, Callback>,
 }
 
 impl EventSystem {
     pub fn new() -> EventSystem {
         EventSystem::default()
     }
-}
 
-impl AddAssign<Tag> for EventSystem {
-    fn add_assign(&mut self, tag: Tag) {
+    pub fn insert(&mut self, func: Tag) -> ID {
         macro_rules! tag_add {
-            (tag: $tag:ident, $((key: $key:ident, field: $field:ident)),*) => {
+            (tag: $tag:ident, id: $id:ident, $((key: $key:ident, field: $field:ident)),*) => {
                 match $tag {
                     $(
-                    Tag::$key(func) => self.$field.push(func),
+                        Tag::$key(function) => {self.$field.insert($id, function);},
                     )*
                 }
             };
         }
 
-        tag_add!(tag:tag,
+        let id: ID = unsafe {
+            GLOBAL_COUNTER += 1;
+            ID(GLOBAL_COUNTER)
+        };
+
+        tag_add!(tag: func, id: id,
             (key: KeyPressed, field: key_pressed),
             (key: KeyReleased, field: key_released),
             (key: MousePressed, field: mouse_pressed),
@@ -77,6 +86,33 @@ impl AddAssign<Tag> for EventSystem {
             (key: WindowLostFocus, field: window_lost_focus),
             (key: WindowMoved, field: window_moved)
         );
+
+        id
+    }
+
+    pub fn remove_callback(&mut self, id: ID) {
+        self.key_pressed.remove(&id);
+        self.key_released.remove(&id);
+        self.mouse_pressed.remove(&id);
+        self.mouse_released.remove(&id);
+        self.mouse_moved.remove(&id);
+        self.window_resized.remove(&id);
+        self.window_closed.remove(&id);
+        self.window_focused.remove(&id);
+        self.window_lost_focus.remove(&id);
+        self.window_moved.remove(&id);
+    }
+}
+
+impl Into<SIZE> for ID {
+    fn into(self) -> SIZE {
+        self.0
+    }
+}
+
+impl Into<ID> for SIZE {
+    fn into(self) -> ID {
+        ID(self)
     }
 }
 
@@ -94,22 +130,34 @@ impl Debug for EventSystem {
             .finish()
     }
 }
+
 // A temporary solution, then the functions themselves will take their values.
 macro_rules! event_impl {
     ($($i:ident),*) => {
         $(
             #[inline]
             fn $i(&mut self){
-                self.$i.iter().for_each(|func| func());
+                self.$i.values().for_each(|f| f());
             }
         )*
     };
 }
 
-impl EventHandler for EventSystem {
+impl InputHandler for EventSystem {
+    type Key = glfw::Key;
+    type Action = glfw::Action;
+
+    fn key_callback(&mut self, key: Self::Key, action: Self::Action) {
+        match action {
+            glfw::Action::Release => &mut self.key_released,
+            glfw::Action::Press => &mut self.key_pressed,
+            glfw::Action::Repeat => &mut self.key_pressed,
+        }
+        .values()
+        .for_each(|f| f(key));
+    }
+
     event_impl!(
-        key_pressed,
-        key_released,
         mouse_pressed,
         mouse_released,
         mouse_moved,

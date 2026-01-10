@@ -1,7 +1,7 @@
 use crate::EventSystem;
 use std::time::Instant;
 use wasabi_traits::Layer;
-use wasabi_traits::event::EventHandler;
+use wasabi_traits::input::EventHandler;
 
 #[test]
 fn benchmark() {
