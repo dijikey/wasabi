@@ -112,9 +112,11 @@ pub fn debug_if_debug(input: TokenStream) -> TokenStream {
     }
 
     let expanded = quote! {
+        use std::fmt::{Debug, Formatter};
+
         impl #impl_generics Debug for #name #ty_generics_impl #new_where_clause {
             fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-                f.debug_struct("Engine")
+                f.debug_struct(stringify!(#name))
                 #(#fmt_fields)*
                 .finish()
             }
