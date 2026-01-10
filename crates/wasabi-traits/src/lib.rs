@@ -1,9 +1,15 @@
-//! This module provides main traits for preparing the engine.
+//! This module provides traits for engine.
 
-use std::{fmt::Debug, hash::Hash};
+use std::fmt::Debug;
 
-pub mod input;
+mod input;
+mod renderer;
 pub mod scene;
+mod win;
+
+pub use input::InputHandler;
+pub use renderer::Renderer;
+pub use win::WindowContext;
 
 /// Trait for layers with render/update ordering support
 pub trait Layer: Debug {
@@ -28,19 +34,4 @@ pub trait Layer: Debug {
     fn is_frozen(&self) -> bool {
         false
     }
-}
-
-pub trait WindowContext {
-    type Key: Debug + Clone + Copy + Eq + Hash + PartialEq;
-    type Action: Debug + Clone + Copy + Eq + Hash + PartialEq;
-
-    fn should_close(&self) -> bool;
-    fn swap_buffer(&mut self);
-    fn poll_events(&mut self);
-
-    fn hook_key_callback<F>(&mut self, callback: F)
-    where
-        F: FnMut(Self::Key, Self::Action) + 'static;
-
-    // fn loader_function<T>(&mut self, s: &str) -> *const T;
 }

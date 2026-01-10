@@ -17,8 +17,13 @@ wasabi-traits = {path = "crates/wasabi-traits"}
 gethand = { path = "crates/gethand" }
 log = "0.4.25"
 
+[target.'cfg(feature = "default")'.dependencies]
+wasabi-event_sys = {path = "crates/wasabi-event_sys", features = []}
+wasabi-win = {path = "crates/wasabi-win"}
+wasabi-renderer = {path="crates/wasabi-renderer"}
 
 [dev-dependencies]
+wasabi-renderer = {path="crates/wasabi-renderer"}
 wasabi-event_sys = {path = "crates/wasabi-event_sys", features = []}
 wasabi-win = {path = "crates/wasabi-win"}
 env_logger = "0.11.5"

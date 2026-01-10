@@ -1,17 +1,16 @@
 use std::{fmt::Debug, hash::Hash};
 
 pub trait InputHandler {
+    type MouseKey: Debug + Clone + Copy + Eq + Hash + PartialEq;
     type Key: Debug + Clone + Copy + Eq + Hash + PartialEq;
     type Action: Debug + Clone + Copy + Eq + Hash + PartialEq;
 
     /// You don't need to call the function yourself, it's called inside the engine.
     fn key_callback(&mut self, key: Self::Key, action: Self::Action);
     /// You don't need to call the function yourself, it's called inside the engine.
-    fn mouse_moved(&mut self);
+    fn mouse_moved(&mut self, x: f64, y: f64);
     /// You don't need to call the function yourself, it's called inside the engine.
-    fn mouse_pressed(&mut self);
-    /// You don't need to call the function yourself, it's called inside the engine.
-    fn mouse_released(&mut self);
+    fn mouse_callback(&mut self, key: Self::MouseKey, action: Self::Action);
     /// You don't need to call the function yourself, it's called inside the engine.
     fn window_closed(&mut self);
     /// You don't need to call the function yourself, it's called inside the engine.
