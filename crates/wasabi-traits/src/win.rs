@@ -1,25 +1,14 @@
-use std::{fmt::Debug, hash::Hash, os::raw::c_void};
+use std::{fmt::Debug, os::raw::c_void};
 
 pub trait WindowContext {
-    type MouseKey: Debug + Clone + Copy + Eq + Hash + PartialEq;
-    type Key: Debug + Clone + Copy + Eq + Hash + PartialEq;
-    type Action: Debug + Clone + Copy + Eq + Hash + PartialEq;
+    type Event: Debug + Clone + PartialEq;
 
     fn should_close(&self) -> bool;
     fn swap_buffer(&mut self);
     fn poll_events(&mut self);
-
-    fn hook_key_callback<F>(&mut self, callback: F)
-    where
-        F: FnMut(Self::Key, Self::Action) + 'static;
-
-    fn hook_mouse_position_callback<F>(&mut self, callback: F)
-    where
-        F: FnMut(f64, f64) + 'static;
-
-    fn hook_mouse_callback<F>(&mut self, callback: F)
-    where
-        F: FnMut(Self::MouseKey, Self::Action) + 'static;
+    fn set_version(&mut self, major: u32, minor: u32);
+    fn get_framebuffer_size(&self) -> (i32, i32);
+    fn flush(&self) -> impl Iterator<Item = Self::Event>;
 
     fn loader_function(&mut self, s: &str) -> *const c_void;
 }
