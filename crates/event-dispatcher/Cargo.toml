@@ -1,0 +1,12 @@
+[package]
+name = "event-dispatcher"
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+authors = ["dijikey"]
+repository = "https://github.com/dijikey/wasabi"
+keywords = ["wasabi"]
+
+[dependencies]
+glfw = "0.60.0"
+wasabi-traits = {path = "../wasabi-traits"}
