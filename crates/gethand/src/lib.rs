@@ -38,6 +38,7 @@ pub fn getters_derive(input: TokenStream) -> TokenStream {
 
         if !only_mut {
             immut_getters.push(quote! {
+                #[inline]
                 pub fn #field_name(&self) -> &#field_type {
                     &self.#field_name
                 }
@@ -47,6 +48,7 @@ pub fn getters_derive(input: TokenStream) -> TokenStream {
         let mut_name = Ident::new(&format!("{field_name}_mut"), field_name.span());
 
         mut_getters.push(quote! {
+            #[inline]
             pub fn #mut_name(&mut self) -> &mut #field_type {
                 &mut self.#field_name
             }
