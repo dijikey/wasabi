@@ -4,5 +4,6 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-glow = "0.16"
+gl = "0.14.0"
 wasabi-traits = {path="../wasabi-traits"}
+log = "0.4.25"
