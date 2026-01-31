@@ -12,14 +12,8 @@ pub struct WindowBuilder<'a> {
     pub resizeable: bool,
     pub decorated: bool,
     pub raw_input: bool,
-    // pub min_size: Option<(u32, u32)>,
-    // pub max_size: Option<(u32, u32)>,
     pub maximized: bool,
-    // pub minimized: bool,
     pub visible: bool,
-    // pub transparent: bool,
-    // pub any_thread: bool,
-    // pub dpi_aware: bool,
     pub focused: bool,
 }
 

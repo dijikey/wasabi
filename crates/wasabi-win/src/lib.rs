@@ -1,6 +1,6 @@
 use std::os;
 
-use glfw::{Context, PWindow};
+use glfw::{Context, GlfwReceiver, PWindow};
 use glfw::{Glfw, InitError};
 use wasabi_traits::WindowContext;
 
@@ -21,8 +21,16 @@ pub fn builder<'a>() -> WindowBuilder<'a> {
 pub struct Window<Flag: WindowFlag> {
     pub glfw: Glfw,
     // SAFETY
+    pub receiver: Option<GlfwReceiver<(f64, glfw::WindowEvent)>>,
     pub raw: Option<glfw::PWindow>,
     marker: std::marker::PhantomData<Flag>,
+}
+
+#[allow(private_bounds)]
+impl<F: WindowFlag> Window<F> {
+    pub fn window_hint(&mut self, hint: WindowHint) {
+        self.glfw.window_hint(hint);
+    }
 }
 
 impl Window<Constructed> {
@@ -32,6 +40,7 @@ impl Window<Constructed> {
 
         Ok(Window {
             glfw,
+            receiver: None,
             raw: None,
             marker: std::marker::PhantomData,
         })
@@ -44,24 +53,19 @@ impl Window<Constructed> {
         let title = attrs.2;
         let mode = attrs.3;
 
-        let (mut window, _) = match self.glfw.create_window(w, h, title, mode) {
+        let (mut window, receiver) = match self.glfw.create_window(w, h, title, mode) {
             Some(v) => v,
             None => return None,
         };
 
-        window.set_key_polling(true);
-
-        // window.set_key_callback();
+        window.set_all_polling(true);
 
         Some(Window {
             glfw: self.glfw,
+            receiver: Some(receiver),
             raw: Some(window),
             marker: std::marker::PhantomData,
         })
-    }
-
-    pub fn window_hint(&mut self, hint: WindowHint) {
-        self.glfw.window_hint(hint);
     }
 }
 
@@ -100,12 +104,14 @@ impl From<InitError> for WindowError {
 }
 
 impl WindowContext for Window<Initialized> {
-    type MouseKey = glfw::MouseButton;
-    type Key = glfw::Key;
-    type Action = glfw::Action;
+    type Event = (f64, glfw::WindowEvent);
 
     fn should_close(&self) -> bool {
         self.raw_ref().should_close()
+    }
+
+    fn flush(&self) -> impl Iterator<Item = Self::Event> {
+        glfw::flush_messages(unsafe { self.receiver.as_ref().unwrap_unchecked() })
     }
 
     fn swap_buffer(&mut self) {
@@ -116,37 +122,22 @@ impl WindowContext for Window<Initialized> {
         self.glfw.poll_events();
     }
 
-    fn hook_key_callback<F>(&mut self, mut callback: F)
-    where
-        F: FnMut(Self::Key, Self::Action) + 'static,
-    {
-        self.raw_mut()
-            .set_key_callback(move |_win, key, _scancode, action, _modifiers| {
-                callback(key, action)
-            });
+    fn set_version(&mut self, major: u32, minor: u32) {
+        self.window_hint(WindowHint::ContextVersion(major, minor));
+        #[cfg(target_os = "macos")]
+        self.window_hint(glfw::WindowHint::OpenGlForwardCompat(true));
+        self.window_hint(glfw::WindowHint::OpenGlProfile(
+            glfw::OpenGlProfileHint::Core,
+        ));
     }
 
-    fn hook_mouse_position_callback<F>(&mut self, mut callback: F)
-    where
-        F: FnMut(f64, f64) + 'static,
-    {
-        self.raw_mut()
-            .set_cursor_pos_callback(move |_win, x, y| callback(x, y));
-    }
-
-    fn hook_mouse_callback<F>(&mut self, mut callback: F)
-    where
-        F: FnMut(Self::MouseKey, Self::Action) + 'static,
-    {
-        self.raw_mut()
-            .set_mouse_button_callback(move |_win, btn, action, _modifiers| callback(btn, action));
+    fn get_framebuffer_size(&self) -> (i32, i32) {
+        self.raw_ref().get_framebuffer_size()
     }
 
     fn loader_function(&mut self, s: &str) -> *const os::raw::c_void {
         unsafe {
-            self.raw
-                .as_mut()
-                .unwrap_unchecked()
+            self.raw_mut()
                 .get_proc_address(s)
                 .map(|f| std::mem::transmute(f))
                 .unwrap_or(std::ptr::null())
