@@ -1,6 +1,5 @@
+#![feature(associated_type_defaults)]
 mod core;
-#[cfg(feature = "default")]
-pub mod default;
 
 pub use core::*;
 
@@ -8,11 +7,26 @@ pub mod traits {
     pub use wasabi_traits::*;
 }
 
-pub mod prelude {
-    pub use crate::core::*;
-    pub use crate::traits::Layer;
-    pub use crate::traits::scene::*;
-}
-
 #[cfg(test)]
 mod test;
+
+pub trait Application {
+    type InputHandler: traits::InputHandler;
+    type WindowHandler: traits::WindowContext<Event: Into<<Self::InputHandler as traits::InputHandler>::Event>>;
+    type Renderer: traits::Renderer;
+
+    fn render(&self, renderer: &Self::Renderer);
+
+    fn update(
+        &mut self,
+        engine: &mut Handlers<Self::WindowHandler, Self::Renderer, Self::InputHandler>,
+    );
+
+    fn initialize(
+        &self,
+    ) -> (
+        Self::WindowHandler,
+        Self::InputHandler,
+        Option<Self::Renderer>,
+    );
+}
