@@ -1,6 +1,6 @@
 [package]
 name = "wasabi"
-version = "0.1.3"
+version = "0.0.4"
 edition = "2024"
 license = "MIT"
 authors = ["dijikey"]
@@ -14,16 +14,15 @@ default = []
 
 [dependencies]
 wasabi-traits = {path = "crates/wasabi-traits"}
-gethand = { path = "crates/gethand" }
+
 log = "0.4.25"
 
-[target.'cfg(feature = "default")'.dependencies]
-wasabi-event_sys = {path = "crates/wasabi-event_sys", features = []}
-wasabi-win = {path = "crates/wasabi-win"}
-wasabi-renderer = {path="crates/wasabi-renderer"}
+# [target.'cfg(feature = "default")'.dependencies]
+# wasabi-win = {path = "crates/wasabi-win"}
+# wasabi-renderer = {path="crates/wasabi-renderer"}
 
 [dev-dependencies]
 wasabi-renderer = {path="crates/wasabi-renderer"}
-wasabi-event_sys = {path = "crates/wasabi-event_sys", features = []}
 wasabi-win = {path = "crates/wasabi-win"}
+event-dispatcher = {path="crates/event-dispatcher"}
 env_logger = "0.11.5"
